@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Configuração para garantir que a página seja responsiva em todos os dispositivos -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuário</title>
+    <!-- Importação do Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter como padrão para toda a página */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Estilo para a caixa de mensagem personalizada */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none; /* Inicia escondida */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Container principal do cartão de perfil -->
+    <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+        <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Meu Perfil</h1>
+
+        <!-- Seção de foto de perfil -->
+        <div class="flex flex-col items-center mb-6">
+            <div class="relative w-32 h-32 rounded-full overflow-hidden mb-4 border-4 border-gray-300 shadow-md">
+                <!-- Imagem de placeholder para o avatar do usuário -->
+                <img id="profile-image" class="w-full h-full object-cover" src="https://placehold.co/128x128/e2e8f0/6b7280?text=Foto" alt="Foto de Perfil">
+                <!-- Botão para carregar nova imagem, posicionado no canto -->
+                <label for="image-upload" class="absolute bottom-0 right-0 p-2 bg-blue-500 rounded-full text-white cursor-pointer hover:bg-blue-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14.25v2.25M12 18.75h.008v.008H12z" />
+                    </svg>
+                    <input type="file" id="image-upload" class="hidden" accept="image/*">
+                </label>
+            </div>
+            <p class="text-gray-500 text-sm">Clique para alterar a foto</p>
+        </div>
+
+        <!-- Formulário para informações do usuário -->
+        <form id="profile-form">
+            <!-- Campo para o nome completo -->
+            <div class="mb-4">
+                <label for="full-name" class="block text-gray-700 text-sm font-semibold mb-2">Nome Completo</label>
+                <input type="text" id="full-name" name="full-name" placeholder="Digite seu nome completo" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Campo para o nome de usuário -->
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700 text-sm font-semibold mb-2">Nome de Usuário</label>
+                <input type="text" id="username" name="username" placeholder="Crie seu nome de usuário" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Campo para a idade -->
+            <div class="mb-4">
+                <label for="age" class="block text-gray-700 text-sm font-semibold mb-2">Idade</label>
+                <input type="number" id="age" name="age" placeholder="Digite sua idade" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Campo para o e-mail -->
+            <div class="mb-6">
+                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="Digite seu e-mail" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Botão para salvar as alterações -->
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg">
+                Salvar Alterações
+            </button>
+        </form>
+
+        <!-- Seção para os novos botões de navegação e saída -->
+        <div class="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+            <!-- Botão para voltar à página anterior -->
+            <button id="back-button" class="w-full sm:w-1/2 bg-gray-400 text-white font-bold py-3 px-4 rounded-md hover:bg-gray-500 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                Voltar à Sessão Anterior
+            </button>
+            <!-- Botão para sair da sessão -->
+            <button id="logout-button" class="w-full sm:w-1/2 bg-red-600 text-white font-bold py-3 px-4 rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2">
+                Sair
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensagem de notificação personalizada (substitui o 'alert()') -->
+    <div id="message-box" class="message-box bg-white p-6 rounded-md shadow-xl text-center">
+        <p id="message-text" class="text-lg font-semibold mb-4"></p>
+        <button id="close-message" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+            Fechar
+        </button>
+    </div>
+
+    <script>
+        // Obtém todos os elementos necessários do DOM
+        const form = document.getElementById('profile-form');
+        const imageInput = document.getElementById('image-upload');
+        const profileImage = document.getElementById('profile-image');
+        const backButton = document.getElementById('back-button');
+        const logoutButton = document.getElementById('logout-button');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageButton = document.getElementById('close-message');
+
+        /**
+         * Exibe uma caixa de mensagem personalizada com o texto fornecido.
+         * @param {string} text - O texto a ser exibido na mensagem.
+         */
+        function showMessageBox(text) {
+            messageText.textContent = text;
+            messageBox.style.display = 'block';
+        }
+
+        /**
+         * Esconde a caixa de mensagem personalizada.
+         */
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+        }
+
+        // Adiciona um ouvinte de evento para o envio do formulário
+        form.addEventListener('submit', function(e) {
+            // Previne o comportamento padrão de recarregar a página
+            e.preventDefault();
+
+            // Coleta os dados do formulário
+            const fullName = document.getElementById('full-name').value;
+            const username = document.getElementById('username').value;
+            const age = document.getElementById('age').value;
+            const email = document.getElementById('email').value;
+
+            // Cria um objeto com os dados coletados
+            const profileData = {
+                fullName,
+                username,
+                age: Number(age),
+                email
+            };
+
+            // Exibe os dados no console para demonstração
+            console.log('Dados do perfil salvos:', profileData);
+            showMessageBox('Perfil atualizado com sucesso! Veja os dados no console.');
+        });
+
+        // Adiciona um ouvinte de evento para a mudança na seleção de imagem
+        imageInput.addEventListener('change', function(e) {
+            // Verifica se um arquivo foi selecionado
+            const file = e.target.files[0];
+            if (file) {
+                // Cria um URL temporário para a imagem selecionada
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Define a fonte da imagem para o URL temporário
+                    profileImage.src = event.target.result;
+                };
+                // Lê o arquivo como um URL de dados
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Adiciona um ouvinte de evento para o botão "Voltar"
+        backButton.addEventListener('click', function() {
+            // Usa o histórico do navegador para voltar para a página anterior
+            window.history.back();
+        });
+
+        // Adiciona um ouvinte de evento para o botão "Sair"
+        logoutButton.addEventListener('click', function() {
+            // Exibe uma mensagem de "Sessão encerrada"
+            showMessageBox('Sessão encerrada com sucesso!');
+            // Você pode adicionar aqui a lógica para deslogar o usuário do sistema
+        });
+
+        // Adiciona um ouvinte de evento para o botão "Fechar" na caixa de mensagem
+        closeMessageButton.addEventListener('click', hideMessageBox);
+    </script>
+</body>
+</html>

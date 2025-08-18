@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexa - Dashboard</title>
+    <!-- Carrega o Tailwind CSS para design responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a fonte 'Inter' do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .progress-circle {
+            stroke-dasharray: 251.2;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        /* Efeitos para o modal de recompensa */
+        @keyframes bounce-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        #reward-modal > div {
+            animation: bounce-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .correct-answer {
+            background-color: #d1fae5;
+            border-color: #34d399;
+            color: #065f46;
+        }
+        .incorrect-answer {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Modal de Mensagem (substitui o 'alert()') -->
+    <div id="message-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4 text-center">
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Mensagem</h3>
+            <p id="modal-message-text" class="text-gray-600">Mensagem de demonstração.</p>
+            <button id="close-modal" class="mt-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Recompensa -->
+    <div id="reward-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-sm w-full mx-4 text-center">
+            <h3 class="text-3xl font-extrabold text-blue-600 mb-4">Parabéns!</h3>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-16 h-16 text-yellow-500 mx-auto mb-4 animate-bounce">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21l-5.83-5.83M2.25 10.5h16.5m-4.5 4.5l-5.83 5.83M3 13.5v-3h18v3H3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75a9.75 9.75 0 1 0 0-19.5 9.75 9.75 0 0 0 0 19.5ZM12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 18.75a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5Z" />
+            </svg>
+            <p class="text-lg text-gray-700 font-semibold mb-2">Você ganhou <span id="reward-points" class="text-2xl font-bold text-blue-600">50</span> pontos!</p>
+            <p class="text-sm text-gray-500">Volte amanhã para outra recompensa.</p>
+            <button id="close-reward-modal" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md">Ótimo!</button>
+        </div>
+    </div>
+
+    <!-- Container principal que alterna entre o Dashboard e as Atividades -->
+    <div id="main-container">
+    
+        <!-- Conteúdo do Dashboard -->
+        <div id="dashboard-container">
+            <!-- Cabeçalho (Header) -->
+            <header class="bg-white shadow-sm sticky top-0 z-40">
+                <div class="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+                    <!-- Logotipo do Site -->
+                    <a href="#" class="flex items-center space-x-2 text-2xl font-bold text-gray-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8 text-blue-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6H6a6 6 0 0 0 6 6z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 0 1-9-9h18c0 4.97-4.03 9-9 9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v9M12 3a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+                        </svg>
+                        <span>Lexa</span>
+                    </a>
+                    <!-- Menu de navegação (simplificado para o dashboard) -->
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">Dashboard</a>
+                        <a href="#" class="text-gray-600 hover:text-blue-600 transition-colors font-medium">Perfil</a>
+                        <button class="bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors shadow-md">Sair</button>
+                    </nav>
+                    <!-- Botão de menu hamburguer para mobile -->
+                    <button id="menu-toggle" class="md:hidden text-gray-600 hover:text-blue-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Menu Mobile (deslizante) -->
+            <div id="mobile-menu" class="fixed inset-y-0 right-0 w-64 bg-white z-30 transform translate-x-full transition-transform ease-in-out duration-300 md:hidden">
+                <div class="p-6 pt-16 flex flex-col space-y-4">
+                    <a href="#" class="text-gray-800 hover:text-blue-600 font-medium text-lg">Dashboard</a>
+                    <a href="#" class="text-gray-800 hover:text-blue-600 font-medium text-lg">Perfil</a>
+                    <button class="mt-4 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors">Sair</button>
+                </div>
+            </div>
+
+            <!-- Conteúdo principal do Dashboard -->
+            <main class="container mx-auto px-4 sm:px-6 py-12">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-2">Olá, Aluno!</h1>
+                <p class="text-lg sm:text-xl text-gray-600 mb-10">Bem-vindo de volta. Continue sua jornada para a fluência.</p>
+                <div class="mb-6 text-sm text-gray-500">
+                    <p id="user-id-display">ID do Usuário: Carregando...</p>
+                </div>
+
+                <!-- Seção de Progresso e Gamificação -->
+                <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <!-- Card de Progresso Geral -->
+                    <div class="bg-white p-8 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Seu Progresso Geral</h2>
+                        <div class="flex items-center justify-center">
+                            <div class="relative w-40 h-40">
+                                <!-- Fundo do círculo de progresso -->
+                                <svg class="w-full h-full" viewBox="0 0 100 100">
+                                    <circle class="text-gray-200 stroke-current" stroke-width="10" cx="50" cy="50" r="40" fill="transparent"></circle>
+                                    <!-- Círculo de progresso preenchido (75% como exemplo) -->
+                                    <circle class="text-blue-500 stroke-current progress-circle" stroke-width="10" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent"
+                                        style="stroke-dashoffset: calc(251.2 - (251.2 * 75) / 100); transform: rotate(-90deg); transform-origin: 50% 50%;"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-4xl font-bold text-blue-600">75%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-center text-lg mt-4 text-gray-600">Você está no caminho certo!</p>
+                    </div>
+                    <!-- Card de Gamificação: Pontos e Check-in -->
+                    <div class="bg-white p-8 rounded-xl shadow-md flex flex-col items-center justify-center">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Pontos de Experiência</h2>
+                        <div class="flex items-center space-x-2 text-4xl font-extrabold text-blue-600 mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-10 h-10 text-yellow-500">
+                                <path fill-rule="evenodd" d="M12 1.5a.75.75 0 0 1 .75.75V3a.75.75 0 0 1-1.5 0V2.25A.75.75 0 0 1 12 1.5ZM4.5 9a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5H5.25A.75.75 0 0 1 4.5 9Zm15 .75a.75.75 0 0 0 0-1.5h-.75a.75.75 0 0 0 0 1.5h.75ZM6.75 9a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5H7.5A.75.75 0 0 1 6.75 9Zm-.75 4.5a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75Zm2.25-1.5a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5H8.25ZM11.25 10.5a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM10.5 13.5a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM15 12.75a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75ZM16.5 12.75a.75.75 0 0 0 0-1.5h-.75a.75.75 0 0 0 0 1.5h.75ZM18.75 9a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5H19.5a.75.75 0 0 1-.75-.75ZM18 12.75a.75.75 0 0 0 0-1.5h-.75a.75.75 0 0 0 0 1.5h.75ZM13.5 10.5a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 0 0-1.5h-.75ZM13.5 14.25a.75.75 0 0 1 .75-.75h.75a.75.75 0 0 1 0 1.5h-.75a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+                                <path d="M12 21.75a9.75 9.75 0 1 0 0-19.5 9.75 9.75 0 0 0 0 19.5ZM12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 18.75a6.75 6.75 0 1 0 0-13.5 6.75 6.75 0 0 0 0 13.5Z" />
+                            </svg>
+                            <span id="user-points">0</span>
+                        </div>
+                        <button id="checkin-btn" class="w-full bg-yellow-500 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-600 transition-colors shadow-md transform active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            Fazer Check-in Diário
+                        </button>
+                    </div>
+                    
+                </section>
+
+                <!-- Seção de Níveis de Aprendizado com Habilidades -->
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Card de Nível: A1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível A1</h3>
+                        <p class="text-sm text-gray-500 mb-4">Entender e usar expressões cotidianas e frases básicas.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-green-500 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors skill-btn" data-skill="listening" data-level="A1">Listening</button>
+                            <button class="w-full bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors skill-btn" data-skill="speaking" data-level="A1">Speaking</button>
+                            <button class="w-full bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors skill-btn" data-skill="reading" data-level="A1">Reading</button>
+                            <button class="w-full bg-green-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors skill-btn" data-skill="writing" data-level="A1">Writing</button>
+                        </div>
+                    </div>
+                    <!-- Card de Nível: A2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível A2</h3>
+                        <p class="text-sm text-gray-500 mb-4">Comunicar-se em tarefas simples e rotineiras.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="listening" data-level="A2">Listening</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="speaking" data-level="A2">Speaking</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="reading" data-level="A2">Reading</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="writing" data-level="A2">Writing</button>
+                        </div>
+                    </div>
+                    <!-- Card de Nível: B1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between opacity-50">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível B1</h3>
+                        <p class="text-sm text-gray-500 mb-4">Lidar com a maioria das situações em viagens.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-gray-400 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold cursor-not-allowed">Listening</button>
+                            <button class="w-full bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold cursor-not-allowed">Speaking</button>
+                            <button class="w-full bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold cursor-not-allowed">Reading</button>
+                            <button class="w-full bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold cursor-not-allowed">Writing</button>
+                        </div>
+                    </div>
+                     <!-- Card de Nível: b2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível B2</h3>
+                        <p class="text-sm text-gray-500 mb-4">Comunicar-se em tarefas simples e rotineiras.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="listening" data-level="A2">Listening</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="speaking" data-level="A2">Speaking</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="reading" data-level="A2">Reading</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="writing" data-level="A2">Writing</button>
+                        </div>
+                    </div>
+                      <!-- Card de Nível: b2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível B2</h3>
+                        <p class="text-sm text-gray-500 mb-4">Comunicar-se em tarefas simples e rotineiras.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="listening" data-level="A2">Listening</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="speaking" data-level="A2">Speaking</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="reading" data-level="A2">Reading</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="writing" data-level="A2">Writing</button>
+                        </div>
+                    </div>
+                      <!-- Card de Nível: b2 -->
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col justify-between">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Nível B2</h3>
+                        <p class="text-sm text-gray-500 mb-4">Comunicar-se em tarefas simples e rotineiras.</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 50%"></div>
+                        </div>
+                        <!-- Botões para cada habilidade -->
+                        <div class="mt-4 space-y-2">
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="listening" data-level="A2">Listening</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="speaking" data-level="A2">Speaking</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="reading" data-level="A2">Reading</button>
+                            <button class="w-full bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors skill-btn" data-skill="writing" data-level="A2">Writing</button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Seção da Atividade de Speaking A1 (inicialmente oculta) -->
+        <div id="speaking-activity-A1" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-btn-A1" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Speaking - Nível A1</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Apresente-se para a Lexa. Diga seu nome, de onde você é e o que você gosta de fazer.
+                </p>
+
+                <!-- Área de Mensagens (simulando a conversa) -->
+                <div id="speaking-chat-messages" class="h-64 overflow-y-auto border border-gray-300 rounded-xl p-4 mb-4 bg-gray-50">
+                    <div class="flex mb-4 justify-start">
+                        <div class="p-4 rounded-xl max-w-xs bg-gray-300 text-gray-800">
+                            Olá! Eu sou a Lexa. Vamos praticar? Por favor, apresente-se.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles para a atividade -->
+                <div id="activity-controls" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <button id="record-btn" class="w-full md:w-auto flex-grow bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors shadow-md">
+                        <span id="record-text">Gravar Resposta</span>
+                    </button>
+                    <button id="play-btn" class="w-full md:w-auto flex-grow bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                        Tocar Gravação
+                    </button>
+                    <button id="submit-btn-A1" class="w-full md:w-auto flex-grow bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors shadow-md">
+                        Enviar
+                    </button>
+                </div>
+                <!-- Área de feedback dinâmico -->
+                <div id="feedback-area" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="bg-blue-100 p-6 rounded-xl border border-blue-200">
+                        <div class="flex items-center space-x-4 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8 text-blue-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xl font-bold text-blue-800">
+                                Pontuação: <span id="feedback-score">90/100</span>
+                            </p>
+                        </div>
+                        <p class="text-gray-700 font-medium" id="feedback-text">
+                            Ótima pronúncia! Você conseguiu se expressar de forma clara.
+                            Para aprimorar, tente usar frases mais completas na próxima vez.
+                        </p>
+                    </div>
+                    <button id="back-to-dashboard-btn" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção da Atividade de Listening A1 (nova, inicialmente oculta) -->
+        <div id="listening-activity-A1" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-listening-a1" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Listening - Nível A1</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Ouça o áudio e responda às perguntas abaixo.
+                </p>
+
+                <!-- Simulação do Áudio Player -->
+                <div class="flex items-center space-x-4 mb-8 p-4 rounded-xl bg-gray-200">
+                    <button id="play-audio-btn-a1" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5M6 12L18 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    <div class="flex-grow bg-gray-300 h-2 rounded-full">
+                        <div class="bg-blue-500 h-2 rounded-full w-1/2"></div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Perguntas -->
+                <form id="listening-quiz-form-a1">
+                    <!-- Pergunta 1 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">1. Qual é a cor favorita de John?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="a" class="form-radio text-blue-600">
+                                <span>Azul</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="b" class="form-radio text-blue-600">
+                                <span>Verde</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="c" class="form-radio text-blue-600">
+                                <span>Vermelho</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta 2 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">2. De onde é a Mary?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="a" class="form-radio text-blue-600">
+                                <span>Estados Unidos</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="b" class="form-radio text-blue-600">
+                                <span>Reino Unido</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="c" class="form-radio text-blue-600">
+                                <span>Canadá</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta 3 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">3. O que eles planejam fazer no fim de semana?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="a" class="form-radio text-blue-600">
+                                <span>Ir ao cinema</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="b" class="form-radio text-blue-600">
+                                <span>Cozinhar</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="c" class="form-radio text-blue-600">
+                                <span>Estudar</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-listening-btn-a1" class="w-full bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors shadow-md">
+                        Verificar Respostas
+                    </button>
+                </form>
+
+                <!-- Área de feedback de Listening (inicialmente oculta) -->
+                <div id="listening-feedback-area-a1" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="listening-feedback-text-a1" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-listening-a1" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Seção da Atividade de Reading A1 (nova, inicialmente oculta) -->
+        <div id="reading-activity-A1" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-reading-a1" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Reading - Nível A1</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Leia o texto abaixo e responda às perguntas.
+                </p>
+
+                <!-- Texto de Leitura -->
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">A Day at the Park</h3>
+                    <p class="text-gray-700">
+                        Hi! My name is Sarah. Today is Saturday, and I am at the park with my dog, Max. The weather is sunny and warm. We are playing fetch. I throw the ball and Max runs to get it. I love Saturdays!
+                    </p>
+                </div>
+
+                <!-- Formulário de Perguntas -->
+                <form id="reading-quiz-form-a1">
+                    <!-- Pergunta 1 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">1. What is the girl's name?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="a" class="form-radio text-blue-600">
+                                <span>Mary</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="b" class="form-radio text-blue-600">
+                                <span>Sarah</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="c" class="form-radio text-blue-600">
+                                <span>Lexa</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta 2 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">2. What is the weather like?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="a" class="form-radio text-blue-600">
+                                <span>Cloudy</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="b" class="form-radio text-blue-600">
+                                <span>Rainy</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="c" class="form-radio text-blue-600">
+                                <span>Sunny and warm</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta 3 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">3. What do they do at the park?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="a" class="form-radio text-blue-600">
+                                <span>Read a book</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="b" class="form-radio text-blue-600">
+                                <span>Play fetch</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q3" value="c" class="form-radio text-blue-600">
+                                <span>Cook lunch</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-reading-btn-a1" class="w-full bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors shadow-md">
+                        Verificar Respostas
+                    </button>
+                </form>
+
+                <!-- Área de feedback de Reading (inicialmente oculta) -->
+                <div id="reading-feedback-area-a1" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="reading-feedback-text-a1" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-reading-a1" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Seção da Atividade de Writing A1 (nova, inicialmente oculta) -->
+        <div id="writing-activity-A1" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-writing-a1" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Writing - Nível A1</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Olhe para a imagem abaixo e descreva-a em 2-3 frases simples em inglês.
+                </p>
+
+                <!-- Imagem para descrever -->
+                <div class="flex justify-center mb-8">
+                    <img src="https://placehold.co/400x250/E9D5FF/6B21A8?text=A+happy+dog+playing" alt="A happy dog playing" class="rounded-xl shadow-md">
+                </div>
+
+                <!-- Formulário de Resposta -->
+                <form id="writing-form-a1">
+                    <textarea id="writing-textarea-a1" rows="4" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Comece a escrever aqui..."></textarea>
+                    <button type="submit" id="submit-writing-btn-a1" class="w-full bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors shadow-md">
+                        Verificar
+                    </button>
+                </form>
+
+                <!-- Área de feedback de Writing (inicialmente oculta) -->
+                <div id="writing-feedback-area-a1" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="writing-feedback-text-a1" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-writing-a1" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Seção da Atividade de Listening A2 (NOVA, inicialmente oculta) -->
+        <div id="listening-activity-A2" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-listening-a2" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Listening - Nível A2</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Ouça a conversa entre duas pessoas a falarem sobre os seus planos para o fim de semana e responda às perguntas abaixo.
+                </p>
+
+                <!-- Simulação do Áudio Player -->
+                <div class="flex items-center space-x-4 mb-8 p-4 rounded-xl bg-gray-200">
+                    <button id="play-audio-btn-a2" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5M6 12L18 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
+                    <div class="flex-grow bg-gray-300 h-2 rounded-full">
+                        <div class="bg-blue-500 h-2 rounded-full w-1/4"></div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Perguntas -->
+                <form id="listening-quiz-form-a2">
+                    <!-- Pergunta 1 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">1. Onde é que John vai no sábado?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="a" class="form-radio text-blue-600">
+                                <span>Ao cinema</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="b" class="form-radio text-blue-600">
+                                <span>À praia</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q1" value="c" class="form-radio text-blue-600">
+                                <span>À biblioteca</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pergunta 2 -->
+                    <div class="mb-6">
+                        <p class="font-semibold text-lg mb-2">2. O que é que Mary vai fazer no domingo?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="a" class="form-radio text-blue-600">
+                                <span>Cozinhar o jantar</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="b" class="form-radio text-blue-600">
+                                <span>Visitar os pais dela</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="radio" name="q2" value="c" class="form-radio text-blue-600">
+                                <span>Ir às compras</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-listening-btn-a2" class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-md">
+                        Verificar Respostas
+                    </button>
+                </form>
+
+                <!-- Área de feedback de Listening (inicialmente oculta) -->
+                <div id="listening-feedback-area-a2" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="listening-feedback-text-a2" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-listening-a2" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Seção da Atividade de Speaking A2 (inicialmente oculta) -->
+        <div id="speaking-activity-A2" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-speaking-a2" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Speaking - Nível A2</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Fale sobre o que você fez no último fim de semana.
+                </p>
+                <form id="speaking-a2-form">
+                    <textarea id="speaking-a2-textarea" rows="6" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Fale sobre seu último fim de semana..."></textarea>
+                    <button type="submit" id="submit-speaking-a2-btn" class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-md">
+                        Enviar
+                    </button>
+                </form>
+                <div id="speaking-a2-feedback-area" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="speaking-a2-feedback-text" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-speaking-a2" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção da Atividade de Dar Direções A2 (inicialmente oculta) -->
+        <div id="directions-activity-A2" class="hidden container mx-auto px-4 sm:px-6 py-12">
+            <button id="back-from-directions-a2" class="mb-6 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Voltar para a Dashboard
+            </button>
+            <div class="bg-white p-8 rounded-xl shadow-md">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Atividade de Dar Direções - Nível A2</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    **Instrução:** Descreva como ir do ponto A (sua posição) para o banco.
+                </p>
+                <!-- Placeholder para o mapa -->
+                <div class="flex justify-center mb-8">
+                    <img src="https://placehold.co/400x250/C4B5FD/4B0082?text=Mapa+da+Cidade" alt="Mapa da cidade para a atividade de direções" class="rounded-xl shadow-md">
+                </div>
+                <form id="directions-a2-form">
+                    <textarea id="directions-a2-textarea" rows="6" class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Descreva as direções para o banco..."></textarea>
+                    <button type="submit" id="submit-directions-a2-btn" class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors shadow-md">
+                        Enviar
+                    </button>
+                </form>
+                <div id="directions-a2-feedback-area" class="mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Seu Feedback</h3>
+                    <div class="p-6 rounded-xl border-2">
+                        <p id="directions-a2-feedback-text" class="text-gray-700 font-medium"></p>
+                    </div>
+                    <button id="back-to-dashboard-from-directions-a2" class="mt-4 w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors shadow-md">
+                        Voltar para a Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- Botão flutuante para Conversar com IA -->
+    <button id="chat-btn" class="fixed bottom-6 right-6 bg-purple-600 text-white p-4 rounded-full shadow-lg hover:bg-purple-700 transition-colors focus:outline-none focus:ring-4 focus:ring-purple-300">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-1.343 3-3s-1.343-3-3-3m0 6a3 3 0 100-6 3 3 0 000 6z" />
+        </svg>
+    </button>
+
+    <!-- Modal de Chat com IA -->
+    <div id="chat-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-xl mx-4 h-5/6 flex flex-col">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900">Conversar com Lexa</h3>
+                <button id="close-chat" class="text-gray-500 hover:text-gray-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto">
+                <!-- Mensagens da conversa serão adicionadas aqui -->
+            </div>
+            <div class="p-4 border-t border-gray-200 flex items-center space-x-2">
+                <input type="text" id="chat-input" placeholder="Digite sua mensagem..." class="flex-grow px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="send-chat" class="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.25 10.5M12 12L21.75 6.75M12 12L21.75 17.25M12 12L3.25 13.5M12 12L12 3.75M12 12L12 20.25" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para funcionalidades -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase services
+        let db, auth, userId;
+
+        // --- Gamification variables ---
+        const POINTS_FOR_CHECKIN = 50;
+        const POINTS_FOR_ACTIVITY = 100;
+        const LISTENING_ANSWERS_A1 = {
+            q1: 'c',
+            q2: 'b',
+            q3: 'a'
+        };
+        const READING_ANSWERS_A1 = {
+            q1: 'b',
+            q2: 'c',
+            q3: 'b'
+        };
+        const LISTENING_ANSWERS_A2 = {
+            q1: 'a',
+            q2: 'b'
+        };
+
+        // --- Firebase functions for data persistence ---
+        async function setupFirebase() {
+            try {
+                // Access configuration variables provided by the environment
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                
+                // Initialize the app and Firebase services
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // User authentication
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Define the user ID (authenticated or anonymous) and display it on screen
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                document.getElementById('user-id-display').textContent = `ID do Usuário: ${userId}`;
+
+                // Load user data after authentication
+                await loadUserData();
+            } catch (error) {
+                console.error("Error setting up Firebase:", error);
+                showMessage("Erro ao carregar seu perfil. O progresso não será salvo.");
+            }
+        }
+
+        async function saveUserData(data) {
+            if (!db || !userId) {
+                console.error("Firestore not initialized or user ID not defined.");
+                return;
+            }
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/profile`);
+            try {
+                await setDoc(userDocRef, data, { merge: true });
+                console.log("Data saved successfully!");
+            } catch (e) {
+                console.error("Error saving data:", e);
+                showMessage("Erro ao salvar seu progresso. Verifique a conexão.");
+            }
+        }
+
+        async function loadUserData() {
+            if (!db || !userId) {
+                console.error("Firestore not initialized or user ID not defined.");
+                return;
+            }
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/profile`);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    console.log("User data loaded:", userData);
+                    updatePointsDisplay(userData.points || 0);
+                    if (isCheckedInToday(userData.lastCheckinDate)) {
+                        document.getElementById('checkin-btn').disabled = true;
+                        document.getElementById('checkin-btn').textContent = 'Check-in Feito!';
+                    }
+                } else {
+                    console.log("No data found. Creating a new profile.");
+                    await saveUserData({ points: 0, lastCheckinDate: null });
+                    updatePointsDisplay(0);
+                }
+            } catch (e) {
+                console.error("Error loading data:", e);
+                showMessage("Erro ao carregar seu progresso. O progresso não será salvo.");
+            }
+        }
+        
+        // --- Gamification Logic ---
+        const addPoints = async (pointsToAdd) => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/profile`);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                let currentPoints = docSnap.exists() ? docSnap.data().points : 0;
+                const newPoints = currentPoints + pointsToAdd;
+                await saveUserData({ points: newPoints });
+                updatePointsDisplay(newPoints);
+            } catch (e) {
+                console.error("Error adding points:", e);
+                showMessage("Erro ao adicionar pontos. Tente novamente.");
+            }
+        };
+
+        const updatePointsDisplay = (points) => {
+            const userPointsEl = document.getElementById('user-points');
+            userPointsEl.textContent = points;
+        };
+
+        const isCheckedInToday = (lastCheckinDate) => {
+            if (!lastCheckinDate) return false;
+            const today = new Date().toISOString().split('T')[0];
+            return lastCheckinDate === today;
+        };
+
+        const handleCheckin = async () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/userData/profile`);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                const userData = docSnap.exists() ? docSnap.data() : { points: 0, lastCheckinDate: null };
+
+                if (isCheckedInToday(userData.lastCheckinDate)) {
+                    showMessage('Você já fez seu check-in diário. Volte amanhã para ganhar mais pontos!');
+                    return;
+                }
+
+                await addPoints(POINTS_FOR_CHECKIN);
+                const today = new Date().toISOString().split('T')[0];
+                await saveUserData({ lastCheckinDate: today });
+                
+                document.getElementById('reward-points').textContent = POINTS_FOR_CHECKIN;
+                showRewardModal();
+                document.getElementById('checkin-btn').disabled = true;
+                document.getElementById('checkin-btn').textContent = 'Check-in Feito!';
+            } catch (e) {
+                console.error("Error on check-in:", e);
+            }
+        };
+
+        // --- UI Logic and Event Handlers ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- UI Element References ---
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const speakingActivityA1 = document.getElementById('speaking-activity-A1');
+            const listeningActivityA1 = document.getElementById('listening-activity-A1');
+            const readingActivityA1 = document.getElementById('reading-activity-A1');
+            const writingActivityA1 = document.getElementById('writing-activity-A1');
+            const listeningActivityA2 = document.getElementById('listening-activity-A2');
+            const speakingActivityA2 = document.getElementById('speaking-activity-A2');
+            const directionsActivityA2 = document.getElementById('directions-activity-A2');
+            
+            const messageModal = document.getElementById('message-modal');
+            const modalMessageText = document.getElementById('modal-message-text');
+            const closeModalBtn = document.getElementById('close-modal');
+            const rewardModal = document.getElementById('reward-modal');
+            const closeRewardModalBtn = document.getElementById('close-reward-modal');
+            const checkinBtn = document.getElementById('checkin-btn');
+            const chatBtn = document.getElementById('chat-btn');
+            const chatModal = document.getElementById('chat-modal');
+            const closeChatBtn = document.getElementById('close-chat');
+            const speakingChatMessages = document.getElementById('speaking-chat-messages');
+
+            // --- Firebase Initialization ---
+            setupFirebase();
+
+            // --- Navigation Functions ---
+            const showDashboard = () => {
+                dashboardContainer.classList.remove('hidden');
+                speakingActivityA1.classList.add('hidden');
+                listeningActivityA1.classList.add('hidden');
+                readingActivityA1.classList.add('hidden');
+                writingActivityA1.classList.add('hidden');
+                listeningActivityA2.classList.add('hidden');
+                speakingActivityA2.classList.add('hidden');
+                directionsActivityA2.classList.add('hidden');
+            };
+
+            const showSpeakingActivityA1 = () => {
+                dashboardContainer.classList.add('hidden');
+                speakingActivityA1.classList.remove('hidden');
+            };
+            
+            const showListeningActivityA1 = () => {
+                dashboardContainer.classList.add('hidden');
+                listeningActivityA1.classList.remove('hidden');
+            };
+
+            const showReadingActivityA1 = () => {
+                dashboardContainer.classList.add('hidden');
+                readingActivityA1.classList.remove('hidden');
+            };
+
+            const showWritingActivityA1 = () => {
+                dashboardContainer.classList.add('hidden');
+                writingActivityA1.classList.remove('hidden');
+            };
+
+            const showListeningActivityA2 = () => {
+                dashboardContainer.classList.add('hidden');
+                listeningActivityA2.classList.remove('hidden');
+            };
+
+            const showSpeakingActivityA2 = () => {
+                dashboardContainer.classList.add('hidden');
+                speakingActivityA2.classList.remove('hidden');
+            };
+
+            const showDirectionsActivityA2 = () => {
+                dashboardContainer.classList.add('hidden');
+                directionsActivityA2.classList.remove('hidden');
+            };
+            
+            // --- General Modal Functions ---
+            const showMessage = (message) => {
+                modalMessageText.textContent = message;
+                messageModal.style.display = 'flex';
+            };
+            
+            const showRewardModal = () => {
+                rewardModal.style.display = 'flex';
+            };
+
+            const appendMessageToSpeakingChat = (sender, text, type) => {
+                const messageContainer = document.createElement('div');
+                messageContainer.className = `flex mb-4 ${type === 'user' ? 'justify-end' : 'justify-start'}`;
+
+                const messageBubble = document.createElement('div');
+                messageBubble.className = `p-4 rounded-xl max-w-xs ${type === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-800'}`;
+                messageBubble.innerHTML = text.replace(/\n/g, '<br>');
+                messageContainer.appendChild(messageBubble);
+
+                speakingChatMessages.appendChild(messageContainer);
+                speakingChatMessages.scrollTop = speakingChatMessages.scrollHeight;
+            };
+
+            // --- Event Listeners ---
+            document.getElementById('menu-toggle').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('translate-x-full');
+            });
+
+            chatBtn.addEventListener('click', () => {
+                chatModal.style.display = 'flex';
+            });
+
+            closeChatBtn.addEventListener('click', () => {
+                chatModal.style.display = 'none';
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                messageModal.style.display = 'none';
+            });
+            
+            closeRewardModalBtn.addEventListener('click', () => {
+                rewardModal.style.display = 'none';
+            });
+
+            checkinBtn.addEventListener('click', handleCheckin);
+
+            // --- Back Buttons ---
+            document.getElementById('back-btn-A1').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', showDashboard);
+            document.getElementById('back-from-listening-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-listening-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-from-reading-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-reading-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-from-writing-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-writing-a1').addEventListener('click', showDashboard);
+            document.getElementById('back-from-listening-a2').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-listening-a2').addEventListener('click', showDashboard);
+            document.getElementById('back-from-speaking-a2').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-speaking-a2').addEventListener('click', showDashboard);
+            document.getElementById('back-from-directions-a2').addEventListener('click', showDashboard);
+            document.getElementById('back-to-dashboard-from-directions-a2').addEventListener('click', showDashboard);
+            
+            // --- Skill Buttons ---
+            document.querySelectorAll('.skill-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const skill = button.dataset.skill;
+                    const level = button.dataset.level;
+                    switch (level) {
+                        case 'A1':
+                            if (skill === 'speaking') showSpeakingActivityA1();
+                            if (skill === 'listening') showListeningActivityA1();
+                            if (skill === 'reading') showReadingActivityA1();
+                            if (skill === 'writing') showWritingActivityA1();
+                            break;
+                        case 'A2':
+                            if (skill === 'speaking') showSpeakingActivityA2();
+                            if (skill === 'listening') showListeningActivityA2();
+                            if (skill === 'directions') showDirectionsActivityA2();
+                            // Placeholder for other A2 skills
+                            break;
+                    }
+                });
+            });
+
+            // --- A1 Speaking Activity Logic ---
+            let isRecording = false;
+            const recordBtn = document.getElementById('record-btn');
+            const recordText = document.getElementById('record-text');
+            const playBtn = document.getElementById('play-btn');
+            const submitBtnA1 = document.getElementById('submit-btn-A1');
+            const activityControls = document.getElementById('activity-controls');
+            const feedbackArea = document.getElementById('feedback-area');
+            const feedbackScore = document.getElementById('feedback-score');
+            const feedbackText = document.getElementById('feedback-text');
+
+            recordBtn.addEventListener('click', () => {
+                isRecording = !isRecording;
+                if (isRecording) {
+                    recordText.textContent = 'Parar Gravação';
+                    recordBtn.classList.remove('bg-red-500');
+                    recordBtn.classList.add('bg-gray-500');
+                    playBtn.disabled = true;
+                    submitBtnA1.disabled = false;
+                } else {
+                    recordText.textContent = 'Gravar Resposta';
+                    recordBtn.classList.remove('bg-gray-500');
+                    recordBtn.classList.add('bg-red-500');
+                    playBtn.disabled = false;
+                    appendMessageToSpeakingChat('Você', 'Olá, meu nome é [Seu nome] e eu sou do [Seu país]. Eu gosto de [Seus hobbies].', 'user');
+                }
+            });
+
+            playBtn.addEventListener('click', () => {
+                showMessage('Reproduzindo gravação...');
+            });
+            
+            submitBtnA1.addEventListener('click', async () => {
+                recordText.textContent = 'Analisando...';
+                recordBtn.disabled = true;
+                playBtn.disabled = true;
+                submitBtnA1.disabled = true;
+
+                // Simulate AI response after 2 seconds
+                setTimeout(async () => {
+                    const feedbackData = {
+                        score: 90,
+                        comment: 'Ótima pronúncia! Você conseguiu se expressar de forma clara.',
+                        suggestion: 'Para aprimorar, tente usar frases mais completas na próxima vez.',
+                        points: POINTS_FOR_ACTIVITY
+                    };
+
+                    await addPoints(feedbackData.points);
+                    document.getElementById('reward-points').textContent = feedbackData.points;
+                    showRewardModal();
+                    
+                    feedbackScore.textContent = `${feedbackData.score}/100`;
+                    feedbackText.textContent = `${feedbackData.comment}. ${feedbackData.suggestion}`;
+                    
+                    const fullFeedbackMessage = `**Pontuação:** ${feedbackData.score}/100\n**Feedback:** ${feedbackData.comment}\n**Sugestão:** ${feedbackData.suggestion}`;
+                    appendMessageToSpeakingChat('Lexa', fullFeedbackMessage, 'system');
+                    
+                    activityControls.classList.add('hidden');
+                    feedbackArea.classList.remove('hidden');
+
+                    recordBtn.disabled = false;
+                    recordText.textContent = 'Gravar Resposta';
+                    playBtn.disabled = true;
+                    submitBtnA1.disabled = false;
+                }, 2000);
+            });
+
+            // --- A1 Listening Activity Logic ---
+            const playAudioBtnA1 = document.getElementById('play-audio-btn-a1');
+            const listeningQuizFormA1 = document.getElementById('listening-quiz-form-a1');
+            const listeningFeedbackAreaA1 = document.getElementById('listening-feedback-area-a1');
+            const listeningFeedbackTextA1 = document.getElementById('listening-feedback-text-a1');
+            
+            playAudioBtnA1.addEventListener('click', () => {
+                showMessage('O áudio está tocando...');
+            });
+
+            listeningQuizFormA1.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(listeningQuizFormA1);
+                let correctCount = 0;
+                let feedback = '';
+                
+                // Q1
+                if (formData.get('q1') === LISTENING_ANSWERS_A1.q1) {
+                    correctCount++;
+                    feedback += 'Pergunta 1: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 1: ❌ Resposta Incorreta (A resposta correta era 'Vermelho')\n`;
+                }
+                // Q2
+                if (formData.get('q2') === LISTENING_ANSWERS_A1.q2) {
+                    correctCount++;
+                    feedback += 'Pergunta 2: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 2: ❌ Resposta Incorreta (A resposta correta era 'Reino Unido')\n`;
+                }
+                // Q3
+                if (formData.get('q3') === LISTENING_ANSWERS_A1.q3) {
+                    correctCount++;
+                    feedback += 'Pergunta 3: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 3: ❌ Resposta Incorreta (A resposta correta era 'Ir ao cinema')\n`;
+                }
+
+                const totalQuestions = Object.keys(LISTENING_ANSWERS_A1).length;
+                const score = (correctCount / totalQuestions) * 100;
+                
+                feedback += `\n**Você acertou ${correctCount} de ${totalQuestions} perguntas. Pontuação: ${score.toFixed(0)}/100.**`;
+                
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                listeningFeedbackTextA1.textContent = feedback;
+                listeningFeedbackAreaA1.classList.remove('hidden');
+                listeningQuizFormA1.style.pointerEvents = 'none';
+                listeningQuizFormA1.style.opacity = '0.5';
+
+                const feedbackDiv = listeningFeedbackAreaA1.querySelector('div');
+                if (score >= 70) {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+                } else {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 incorrect-answer`;
+                }
+            });
+
+            // --- A1 Reading Activity Logic ---
+            const readingQuizFormA1 = document.getElementById('reading-quiz-form-a1');
+            const readingFeedbackAreaA1 = document.getElementById('reading-feedback-area-a1');
+            const readingFeedbackTextA1 = document.getElementById('reading-feedback-text-a1');
+
+            readingQuizFormA1.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData(readingQuizFormA1);
+                let correctCount = 0;
+                let feedback = '';
+
+                // Q1
+                if (formData.get('q1') === READING_ANSWERS_A1.q1) {
+                    correctCount++;
+                    feedback += 'Pergunta 1: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 1: ❌ Resposta Incorreta (A resposta correta era 'Sarah')\n`;
+                }
+                // Q2
+                if (formData.get('q2') === READING_ANSWERS_A1.q2) {
+                    correctCount++;
+                    feedback += 'Pergunta 2: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 2: ❌ Resposta Incorreta (A resposta correta era 'Sunny and warm')\n`;
+                }
+                // Q3
+                if (formData.get('q3') === READING_ANSWERS_A1.q3) {
+                    correctCount++;
+                    feedback += 'Pergunta 3: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 3: ❌ Resposta Incorreta (A resposta correta era 'Play fetch')\n`;
+                }
+
+                const totalQuestions = Object.keys(READING_ANSWERS_A1).length;
+                const score = (correctCount / totalQuestions) * 100;
+                
+                feedback += `\n**Você acertou ${correctCount} de ${totalQuestions} perguntas. Pontuação: ${score.toFixed(0)}/100.**`;
+                
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                readingFeedbackTextA1.textContent = feedback;
+                readingFeedbackAreaA1.classList.remove('hidden');
+                readingQuizFormA1.style.pointerEvents = 'none';
+                readingQuizFormA1.style.opacity = '0.5';
+
+                const feedbackDiv = readingFeedbackAreaA1.querySelector('div');
+                if (score >= 70) {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+                } else {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 incorrect-answer`;
+                }
+            });
+
+            // --- A1 Writing Activity Logic ---
+            const writingFormA1 = document.getElementById('writing-form-a1');
+            const writingTextareaA1 = document.getElementById('writing-textarea-a1');
+            const writingFeedbackAreaA1 = document.getElementById('writing-feedback-area-a1');
+            const writingFeedbackTextA1 = document.getElementById('writing-feedback-text-a1');
+
+            writingFormA1.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userText = writingTextareaA1.value.trim();
+                
+                if (userText.length < 10) {
+                    showMessage('Por favor, escreva um pouco mais. Tente descrever a imagem com mais detalhes.');
+                    return;
+                }
+                
+                const simulatedScore = Math.floor(Math.random() * 20) + 80;
+                const feedbackMessage = `Ótimo! Você usou vocabulário e estrutura de frase de forma clara para descrever a imagem. Continue assim para melhorar sua fluência!`;
+
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                writingFeedbackTextA1.innerHTML = `**Pontuação:** ${simulatedScore}/100<br><br>${feedbackMessage}`;
+                writingFeedbackAreaA1.classList.remove('hidden');
+                writingFormA1.style.display = 'none';
+
+                const feedbackDiv = writingFeedbackAreaA1.querySelector('div');
+                feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+            });
+            
+            // --- A2 Listening Activity Logic (NOVA) ---
+            const playAudioBtnA2 = document.getElementById('play-audio-btn-a2');
+            const listeningQuizFormA2 = document.getElementById('listening-quiz-form-a2');
+            const listeningFeedbackAreaA2 = document.getElementById('listening-feedback-area-a2');
+            const listeningFeedbackTextA2 = document.getElementById('listening-feedback-text-a2');
+
+            playAudioBtnA2.addEventListener('click', () => {
+                showMessage('O áudio está tocando...');
+            });
+
+            listeningQuizFormA2.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(listeningQuizFormA2);
+                let correctCount = 0;
+                let feedback = '';
+
+                // Q1
+                if (formData.get('q1') === LISTENING_ANSWERS_A2.q1) {
+                    correctCount++;
+                    feedback += 'Pergunta 1: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 1: ❌ Resposta Incorreta (A resposta correta era 'Ao cinema')\n`;
+                }
+                // Q2
+                if (formData.get('q2') === LISTENING_ANSWERS_A2.q2) {
+                    correctCount++;
+                    feedback += 'Pergunta 2: ✔️ Resposta Correta\n';
+                } else {
+                    feedback += `Pergunta 2: ❌ Resposta Incorreta (A resposta correta era 'Visitar os pais dela')\n`;
+                }
+
+                const totalQuestions = Object.keys(LISTENING_ANSWERS_A2).length;
+                const score = (correctCount / totalQuestions) * 100;
+                
+                feedback += `\n**Você acertou ${correctCount} de ${totalQuestions} perguntas. Pontuação: ${score.toFixed(0)}/100.**`;
+                
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                listeningFeedbackTextA2.textContent = feedback;
+                listeningFeedbackAreaA2.classList.remove('hidden');
+                listeningQuizFormA2.style.pointerEvents = 'none';
+                listeningQuizFormA2.style.opacity = '0.5';
+
+                const feedbackDiv = listeningFeedbackAreaA2.querySelector('div');
+                if (score >= 70) {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+                } else {
+                    feedbackDiv.className = `p-6 rounded-xl border-2 incorrect-answer`;
+                }
+            });
+
+            // --- A2 Speaking Activity Logic (Simulated) ---
+            const speakingA2Form = document.getElementById('speaking-a2-form');
+            const speakingA2FeedbackArea = document.getElementById('speaking-a2-feedback-area');
+            const speakingA2FeedbackText = document.getElementById('speaking-a2-feedback-text');
+
+            speakingA2Form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userText = document.getElementById('speaking-a2-textarea').value.trim();
+                
+                if (userText.length < 10) {
+                    showMessage('Sua resposta é um pouco curta. Tente adicionar mais detalhes sobre seu fim de semana.');
+                    return;
+                }
+
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                speakingA2FeedbackText.innerHTML = `Excelente! Você usou verbos no passado de forma correta e descreveu suas atividades de forma clara. Parabéns por avançar para o Nível A2!`;
+                speakingA2FeedbackArea.classList.remove('hidden');
+                speakingA2Form.style.display = 'none';
+                
+                const feedbackDiv = speakingA2FeedbackArea.querySelector('div');
+                feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+            });
+
+            // --- A2 Directions Activity Logic (Simulated) ---
+            const directionsA2Form = document.getElementById('directions-a2-form');
+            const directionsA2FeedbackArea = document.getElementById('directions-a2-feedback-area');
+            const directionsA2FeedbackText = document.getElementById('directions-a2-feedback-text');
+
+            directionsA2Form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userText = document.getElementById('directions-a2-textarea').value.trim();
+                
+                if (userText.length < 10) {
+                    showMessage('Sua resposta é um pouco curta. Tente dar mais detalhes sobre as direções.');
+                    return;
+                }
+
+                await addPoints(POINTS_FOR_ACTIVITY);
+                document.getElementById('reward-points').textContent = POINTS_FOR_ACTIVITY;
+                showRewardModal();
+
+                directionsA2FeedbackText.innerHTML = `Muito bom! Você usou as preposições de lugar e as instruções de direção de forma correta. Continue assim!`;
+                directionsA2FeedbackArea.classList.remove('hidden');
+                directionsA2Form.style.display = 'none';
+
+                const feedbackDiv = directionsA2FeedbackArea.querySelector('div');
+                feedbackDiv.className = `p-6 rounded-xl border-2 correct-answer`;
+            });
+        });
+    </script>
+</body>
+</html>
