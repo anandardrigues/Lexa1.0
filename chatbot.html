@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexa </title>
+    <!-- Carrega o framework Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Oculta a barra de rolagem, mas mantém a funcionalidade */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none; /* IE e Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans antialiased">
+
+    <!-- Container principal com layout flex -->
+    <div class="flex flex-col min-h-screen p-4 sm:p-8 md:p-12 justify-center items-center">
+        <!-- Contêiner do chat com design de cartão -->
+        <div class="relative z-10 w-full max-w-2xl bg-gray-800 rounded-2xl p-8 shadow-lg border-2 border-gray-700 flex flex-col h-[70vh]">
+            <h2 class="text-2xl font-extrabold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500">
+                How can I help you today?
+            </h2>
+
+            <!-- Janela de chat - rolável e com overflow-y-auto -->
+            <div id="chat-window" class="flex-grow overflow-y-auto space-y-4 pr-2 no-scrollbar">
+                <!-- Mensagem de boas-vindas inicial -->
+                <div id="welcome-message" class="flex justify-center items-center h-full text-center text-gray-400">
+                    <p>Talk with Lexa. Let's practice!</p>
+                </div>
+            </div>
+
+            <!-- Formulário de entrada do usuário -->
+            <form id="chat-form" class="flex mt-4">
+                <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Type your message..."
+                    class="flex-grow bg-gray-700 text-white placeholder-gray-400 rounded-l-full py-3 px-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                    type="submit"
+                    id="send-button"
+                    class="bg-gradient-to-r from-teal-400 to-blue-500 text-white font-bold py-3 px-6 rounded-r-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                >
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script JavaScript para a lógica do chat -->
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+        const sendButton = document.getElementById('send-button');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        /**
+         * Adiciona uma mensagem ao histórico e a exibe na interface.
+         * @param {string} role - O papel da mensagem ('user' ou 'assistant').
+         * @param {string} content - O conteúdo da mensagem.
+         */
+        function addMessage(role, content) {
+            // Remove a mensagem de boas-vindas se existir
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `p-4 rounded-3xl max-w-[80%] ${role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-700 text-gray-200 rounded-bl-none'}`;
+            messageBubble.textContent = content;
+
+            messageContainer.appendChild(messageBubble);
+            chatWindow.appendChild(messageContainer);
+
+            // Rola a janela de chat para a última mensagem
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        /**
+         * Lida com o envio da mensagem do usuário e a lógica de resposta do chatbot estático.
+         * @param {Event} e - O evento de submissão do formulário.
+         */
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) {
+                return;
+            }
+
+            // Adiciona a mensagem do usuário à interface
+            addMessage('user', message);
+            userInput.value = '';
+            
+            // Lógica de resposta baseada em palavras-chave
+            setTimeout(() => {
+                let response = "I'm still learning! Can you try asking me something else?";
+                const lowerCaseMessage = message.toLowerCase();
+                
+                // Respostas de Saudação e Introdução
+                if (lowerCaseMessage.includes("hello") || lowerCaseMessage.includes("hi")) {
+                    response = "Hello! How are you doing today?";
+                } else if (lowerCaseMessage.includes("good morning")) {
+                    response = "Good morning! It's a great day to practice English.";
+                } else if (lowerCaseMessage.includes("good afternoon")) {
+                    response = "Good afternoon! What's new?";
+                } else if (lowerCaseMessage.includes("good evening")) {
+                    response = "Good evening! How was your day?";
+                } else if (lowerCaseMessage.includes("how are you")) {
+                    response = "I'm doing great, thank you for asking! I'm here to help you practice your English.";
+                } else if (lowerCaseMessage.includes("practice")) {
+                    response = "Let's start! What would you like to talk about?";
+                } else if (lowerCaseMessage.includes("how do you say")) {
+                    response = "I can help with that! What word or phrase do you want to learn?";
+                } else if (lowerCaseMessage.includes("favorite")) {
+                    response = "I don't have feelings, but I can talk about many things! What's your favorite topic?";
+                } else if (lowerCaseMessage.includes("what is your name") || lowerCaseMessage.includes("what's your name")) {
+                    response = "My name is Lexa. It's a pleasure to talk with you!";
+                } else if (lowerCaseMessage.includes("thank you") || lowerCaseMessage.includes("thanks")) {
+                    response = "You're welcome! Keep practicing, you're doing great!";
+                }
+
+                // Tópicos Gramaticais (Básico)
+                else if (lowerCaseMessage.includes("what is a") && (lowerCaseMessage.includes("verb") || lowerCaseMessage.includes("noun") || lowerCaseMessage.includes("adjective"))) {
+                    response = "That's a great question! A verb is an action word. For example, 'run' or 'jump'. A noun is a person, place, or thing. Can you give me an example of a noun?";
+                } else if (lowerCaseMessage.includes("how do you make words plural") || lowerCaseMessage.includes("plural")) {
+                    response = "Usually, we add '-s' to the end of a word to make it plural, like 'cat' becomes 'cats'. But sometimes we use '-es' or change the word completely. For example, 'child' becomes 'children'.";
+                } else if (lowerCaseMessage.includes("difference between") && (lowerCaseMessage.includes("a") || lowerCaseMessage.includes("an")) && lowerCaseMessage.includes("the")) {
+                    response = "That's a key topic! We use 'a' or 'an' for a non-specific person or thing, like 'a book.' We use 'the' for a specific thing that both of us know about, like 'the book on the table.'";
+                }
+
+                // Tópicos Gramaticais (Tempos Verbais)
+                else if (lowerCaseMessage.includes("past tense")) {
+                    response = "The past tense shows that an action happened in the past. To form the simple past, we often add '-ed' to the end of the verb, like 'walked' or 'talked'.";
+                } else if (lowerCaseMessage.includes("present continuous")) {
+                    response = "The present continuous shows an action happening right now. We use 'am', 'is', or 'are' + the verb with '-ing'. For example, 'I am learning English'.";
+                } else if (lowerCaseMessage.includes("preposition")) {
+                    response = "Prepositions are small words that connect ideas, like 'in', 'on', and 'at'. They often show location or time. Do you want an example?";
+                } else if (lowerCaseMessage.includes("how do i ask a question") || lowerCaseMessage.includes("how to form a question")) {
+                    response = "To form a question, you often change the word order, especially with a helping verb. For example, 'You are happy' becomes 'Are you happy?'. What question do you want to ask?";
+                }
+
+                // Novos Tópicos Gramaticais (Avançado)
+                else if (lowerCaseMessage.includes("what are") && lowerCaseMessage.includes("adverbs")) {
+                    response = "Adverbs are words that describe or modify a verb, adjective, or another adverb. They often tell us how, when, where, or to what extent something is done. For example, 'He runs quickly.'";
+                } else if (lowerCaseMessage.includes("what are") && lowerCaseMessage.includes("pronouns")) {
+                    response = "Pronouns are words that replace a noun. Common ones are 'I', 'you', 'he', 'she', 'it', 'we', and 'they'. They help to avoid repetition. For example, 'He likes to read'.";
+                } else if (lowerCaseMessage.includes("what are") && lowerCaseMessage.includes("phrasal verbs")) {
+                    response = "Phrasal verbs combine a verb with a preposition or an adverb to create a new meaning. For example, 'look up' (to search for information) and 'put off' (to postpone). It's a very common topic!";
+                } else if (lowerCaseMessage.includes("active voice") || lowerCaseMessage.includes("passive voice")) {
+                    response = "In the active voice, the subject performs the action (e.g., 'The cat chased the mouse'). In the passive voice, the subject receives the action (e.g., 'The mouse was chased by the cat'). The active voice is more common.";
+                } else if (lowerCaseMessage.includes("modal verbs")) {
+                    response = "Modal verbs are words like 'can,' 'could,' 'may,' 'might,' 'should,' 'must,' and 'will.' They are used to express possibility, ability, permission, or obligation. For example, 'I can speak English.'";
+                } else if (lowerCaseMessage.includes("conjunctions")) {
+                    response = "Conjunctions are linking words that connect two or more parts of a sentence. Common examples are 'and,' 'but,' and 'or.' For instance, 'I like apples and bananas.'";
+                } else if (lowerCaseMessage.includes("can you help me with") || lowerCaseMessage.includes("i need help with")) {
+                    response = "Of course! What specific topic or question do you have? I'm ready to help!";
+                }
+
+                // Adiciona a resposta do chatbot
+                addMessage('assistant', response);
+            }, 500); // Pequeno atraso para simular uma "resposta"
+
+        }
+
+        chatForm.addEventListener('submit', handleSendMessage);
+    </script>
+</body>
+</html>
